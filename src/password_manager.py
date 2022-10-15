@@ -57,5 +57,8 @@ class PasswordManager:
     def get_passwords(self):
         return self._decrypt_passwords()
 
+    def get_password(self, login):
+        return self.get_passwords().get(login)
+
     def delete_passwords(self):
         open(self.password_json_file_path, 'w').close()
