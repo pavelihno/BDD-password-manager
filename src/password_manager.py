@@ -60,5 +60,11 @@ class PasswordManager:
     def get_password(self, login):
         return self.get_passwords().get(login)
 
+    def delete_password(self, login):
+        passwords = self.get_passwords()
+        deleted_password = passwords.pop(login, None)
+        self._encrypt_passwords(passwords)
+        return deleted_password
+
     def delete_passwords(self):
         open(self.password_json_file_path, 'w').close()
