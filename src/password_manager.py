@@ -31,3 +31,31 @@ class PasswordManager:
             backend=backend
         )
         return base64.urlsafe_b64encode(kdf.derive(key.encode(ENCODING)))
+
+    def _encrypt_passwords(self, passwords):
+        with open(self.password_json_file_path, 'wb') as password_json_file:
+            fernet = Fernet(self.key)
+            password_json_file.write(fernet.encrypt(json.dumps(passwords).encode(ENCODING)))
+
+    def _decrypt_passwords(self):
+        try:
+            with open(self.password_json_file_path, 'rb') as password_json_file:
+                fernet = Fernet(self.key)
+                text = password_json_file.read()
+                if text:
+                    return json.loads(fernet.decrypt(text.decode(ENCODING)))
+                else:
+                    return {}
+        except (FileNotFoundError, InvalidToken):
+            return {}
+
+    def save_password(self, login, password):
+        passwords = self.get_passwords()
+        passwords[login] = password
+        self._encrypt_passwords(passwords)
+
+    def get_passwords(self):
+        return self._decrypt_passwords()
+
+    def delete_passwords(self):
+        open(self.password_json_file_path, 'w').close()
